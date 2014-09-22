@@ -40,7 +40,7 @@ if ($ADMIN->fulltree) {
 \mp
 \times
 \ast
-\wedge
+{}^\wedge
 \div
 /
 \mathrm{div}
@@ -52,6 +52,10 @@ if ($ADMIN->fulltree) {
 \leq
 \geq
 =
+==
+\neq
+!=
+<>
 ';
     $setting = new admin_setting_configtextarea('atto_computing/librarygroup1',
                                                 $name,
