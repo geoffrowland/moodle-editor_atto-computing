@@ -19,9 +19,7 @@ Then visit the Admin notifications page of your Moodle to complete the installat
 
 After installation you, need to complete the following steps:
 
-Copy the terminal image file from computing/pix/e/ to the core pix/e/ folder of your Moodle. This enables the terminal icon to be available to the computing editor button ofthe Atto toolbar.
-
-Then add computing to Administration > Site administration > Plugins > Text editors > Atto HTML editor > Atto toolbar settings > Toolbar config, to give, for example:
+Add computing to Administration > Site administration > Plugins > Text editors > Atto HTML editor > Atto toolbar settings > Toolbar config, to give, for example:
 
 insert = computing, equation, charmap, table, clear
 
