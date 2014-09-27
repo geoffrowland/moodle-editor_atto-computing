@@ -26,8 +26,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2014092400;        // The current plugin version (Date: YYYYMMDDXX).
+$plugin->version   = 2014092700;        // The current plugin version (Date: YYYYMMDDXX).
 $plugin->requires  = 2014050800;        // Requires this Moodle version.
 $plugin->component = 'atto_computing';  // Full name of the plugin (used for diagnostics).
 $plugin->maturity = MATURITY_RC; // Release Candidate.
-$plugin->release = 'v2.7-rc3'; // This is the third release candidate for the Moodle 2.7.x branch.
+$plugin->release = 'v2.7-rc4'; // This is the forth release candidate for the Moodle 2.7.x branch.

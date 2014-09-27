@@ -19,7 +19,7 @@ YUI.add('moodle-atto_computing-button', function (Y, NAME) {
  * @package    atto_computing
  * @copyright  2014 Geoffrey Rowland <rowland.geoff@gmail.com>
  * Based on    @package atto_equation
- * @copyright  2013 Damyon Wiese <damyon@moodle.com>>
+ * @copyright  2013 Damyon Wiese <damyon@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -39,6 +39,7 @@ var COMPONENTNAME = 'atto_computing',
     LOGNAME = 'atto_computing',
     CSS = {
         COMPUTING_TEXT: 'atto_computing_computing',
+        COMPUTING_LOADED: 'atto_computing_loaded',
         COMPUTING_PREVIEW: 'atto_computing_preview',
         SUBMIT: 'atto_computing_submit',
         LIBRARY: 'atto_computing_library',
@@ -49,6 +50,7 @@ var COMPONENTNAME = 'atto_computing',
         LIBRARY: '.' + CSS.LIBRARY,
         LIBRARY_GROUP: '.' + CSS.LIBRARY_GROUPS + ' > div > div',
         COMPUTING_TEXT: '.' + CSS.COMPUTING_TEXT,
+        COMPUTING_LOADED: '.' + CSS.COMPUTING_LOADED,
         COMPUTING_PREVIEW: '.' + CSS.COMPUTING_PREVIEW,
         SUBMIT: '.' + CSS.SUBMIT,
         LIBRARY_BUTTON: '.' + CSS.LIBRARY + ' button'
@@ -148,6 +150,33 @@ Y.namespace('M.atto_computing').Button = Y.Base.create('button', Y.M.editor_atto
     _groupFocus: null,
 
     /**
+     * A record of the last equation successfully loaded to preview.
+     *
+     * @property _previewDisplayed
+     * @type String
+     * @private
+     */
+    _previewDisplayed: null,
+
+    /**
+     * A flag to indicate that an Ajax response has been requested.
+     *
+     * @property _previewPending
+     * @type Boolean
+     * @private
+     */
+    _previewPending: false,
+
+    /**
+     * A record of displayed preview divs.
+     *
+     * @property _previewList
+     * @type Array
+     * @private
+     */
+    _previewList: [],
+
+    /**
      * Regular Expression patterns used to pick out the computings in a String.
      *
      * @property _computingPatterns
@@ -236,6 +265,7 @@ Y.namespace('M.atto_computing').Button = Y.Base.create('button', Y.M.editor_atto
         if (computing) {
             content.one(SELECTORS.COMPUTING_TEXT).set('text', computing);
         }
+        this._previewNode = this._content.one(SELECTORS.COMPUTING_PREVIEW);
         this._updatePreview(false);
     },
 
@@ -426,15 +456,18 @@ Y.namespace('M.atto_computing').Button = Y.Base.create('button', Y.M.editor_atto
         var textarea = this._content.one(SELECTORS.COMPUTING_TEXT),
             computing = textarea.get('value'),
             url,
-            preview,
             currentPos = textarea.get('selectionStart'),
             prefix = '',
             cursorLatex = '\\Downarrow ',
-            isChar,
             params;
 
         if (e) {
             e.preventDefault();
+        }
+
+        // If busy with previous request wait.
+        if (this._previewPending) {
+            return;
         }
 
         // Move the cursor so it does not break expressions.
@@ -443,23 +476,30 @@ Y.namespace('M.atto_computing').Button = Y.Base.create('button', Y.M.editor_atto
             currentPos = 0;
         }
 
-        // First move back to the beginning of the line.
-        while (computing.charAt(currentPos) === '\\' && currentPos >= 0) {
-            currentPos -= 1;
+        // First move to the end of the TeX command word.
+        if (computing.substring(0,currentPos + 1).match(/\\[a-zA-Z]+$/)) {
+            currentPos += computing.substring(currentPos).match(/[a-zA-Z]*/)[0].length;
         }
-        isChar = /[a-zA-Z\{\}]/;
-        if (currentPos !== 0) {
-            // Now match to the end of the line.
-            while (isChar.test(computing.charAt(currentPos)) && currentPos < computing.length && isChar.test(computing.charAt(currentPos-1))) {
-                currentPos += 1;
-            }
-        }
+
         // Save the cursor position - for insertion from the library.
         this._lastCursorPos = currentPos;
         computing = prefix + computing.substring(0, currentPos) + cursorLatex + computing.substring(currentPos);
 
-        var previewNode = this._content.one(SELECTORS.COMPUTING_PREVIEW);
         computing = DELIMITERS.START + ' ' + computing + ' ' + DELIMITERS.END;
+
+        // If computing has not changed keep the old preview.
+        if (this._previewDisplayed === computing) {
+            return;
+        }
+
+        // If this has seen before, just display the cached result.
+        if (typeof this._previewList[computing] === 'Object') {
+            this.previewDisplayed = computing;
+            this._previewNode.appendChild(this._previewList[computing]);
+            node.all(SELECTORS.COMPUTING_LOADED).setStyle('display','none');
+            node.all(SELECTORS.COMPUTING_LOADED).pop.setStyle('display','inline');
+            return;
+        }
         // Make an ajax request to the filter.
         url = M.cfg.wwwroot + '/lib/editor/atto/plugins/computing/ajax.php';
         params = {
@@ -469,15 +509,56 @@ Y.namespace('M.atto_computing').Button = Y.Base.create('button', Y.M.editor_atto
             text: computing
         };
 
-        preview = Y.io(url, {
-            sync: true,
-            data: params
+        this._previewPending = true;
+        Y.io(url, {
+            context: this,
+            data: params,
+            timeout: 300,
+            "arguments": computing,
+            on: {complete: this._loadPreview}
         });
+    },
 
+    /**
+     * Load returned preview text into div and append to preview.
+     *
+     * @param {String} id
+     * @param {EventFacade} e
+     * @param {String} computing
+     * @method _loadPreview
+     * @private
+     */
+    _loadPreview: function(id, preview, computing) {
         if (preview.status === 200) {
-            previewNode.setHTML(preview.responseText);
-            Y.fire(M.core.event.FILTER_CONTENT_UPDATED, {nodes: (new Y.NodeList(previewNode))});
+            var node = this._previewNode.appendChild(Y.Node.create(
+                '<span alt=" + computing + "></span>'
+            ));
+            node.setHTML(preview.responseText),
+            this._previewList[computing] = node;
+
+            Y.fire(M.core.event.FILTER_CONTENT_UPDATED, {nodes: (new Y.NodeList(node))});
+            node.setStyle('display', 'none');
+            if (node.one('img')) {
+                Y.io(node.one('img').getAttribute('src'), {
+                    context: this,
+                    on: {
+                        success: function () {
+                            node.addClass(CSS.COMPUTING_LOADED);
+                            this._previewNode.all(SELECTORS.COMPUTING_LOADED).setStyle('display','none');
+                            this._previewNode.all(SELECTORS.COMPUTING_LOADED).pop().setStyle('display','inline');
+                        }
+                    }
+                });
+            } else {
+                node.addClass(CSS.COMPUTING_LOADED);
+                this._previewNode.all(SELECTORS.COMPUTING_LOADED).setStyle('display','none');
+                this._previewNode.all(SELECTORS.COMPUTING_LOADED).pop().setStyle('display','inline');
+            }
+
+            this._previewDisplayed = computing;
         }
+        this._previewPending = false;
+        this._updatePreview();
     },
 
     /**
@@ -511,10 +592,18 @@ Y.namespace('M.atto_computing').Button = Y.Base.create('button', Y.M.editor_atto
         // Keyboard navigation in groups.
         this._content.delegate('key', this._groupNavigation, 'down:37,39', SELECTORS.LIBRARY_BUTTON, this);
 
+        var timer = null;
+        function throttledUpdate(e) {
+            var context = this;
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+                context._updatePreview(e);
+            }, context.get('delay'));
+        }
         this._content.one(SELECTORS.SUBMIT).on('click', this._setComputing, this);
-        this._content.one(SELECTORS.COMPUTING_TEXT).on('valuechange', this._throttle(this._updatePreview, 500), this);
-        this._content.one(SELECTORS.COMPUTING_TEXT).on('mouseup', this._throttle(this._updatePreview, 500), this);
-        this._content.one(SELECTORS.COMPUTING_TEXT).on('keyup', this._throttle(this._updatePreview, 500), this);
+        this._content.one(SELECTORS.COMPUTING_TEXT).on('valuechange', throttledUpdate, this);
+        this._content.one(SELECTORS.COMPUTING_TEXT).on('mouseup', throttledUpdate, this);
+        this._content.one(SELECTORS.COMPUTING_TEXT).on('keyup', throttledUpdate, this);
         this._content.delegate('click', this._selectLibraryItem, SELECTORS.LIBRARY_BUTTON, this);
 
         return this._content;
@@ -604,7 +693,7 @@ Y.namespace('M.atto_computing').Button = Y.Base.create('button', Y.M.editor_atto
             newValue += ' ';
         }
         newValue += tex;
-        focusPoint = newValue.length;
+        focusPoint = newValue.length + 1;
 
         if (oldValue.charAt(this._lastCursorPos) !== ' ') {
             newValue += ' ';
@@ -716,6 +805,16 @@ Y.namespace('M.atto_computing').Button = Y.Base.create('button', Y.M.editor_atto
          */
         library: {
             value: {}
+        },
+
+        /**
+         * The number of microseconds to wait after input stops to update preview
+         *
+         * @attribute delay
+         * @type int
+         */
+        delay: {
+            value: null
         },
 
         /**

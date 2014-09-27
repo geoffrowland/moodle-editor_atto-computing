@@ -56,7 +56,7 @@ function atto_computing_strings_for_js() {
  * @param stdClass $fpoptions - unused.
  */
 function atto_computing_params_for_js($elementid, $options, $fpoptions) {
-    $texexample = '$$\pi$$';
+    $texexample = '$$A \cdot B$$';
 
     // Format a string with the active filter set.
     // If it is modified - we assume that some sort of text filter is working in this context.
