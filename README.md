@@ -17,7 +17,7 @@ git clone https://github.com/geoffrowland/moodle-editor_atto-computing.git compu
 
 Then visit the Admin notifications page of your Moodle to complete the installation.
 
-After installation you, need to complete the following steps:
+After installation, you need to complete the following steps:
 
 Add computing to Administration > Site administration > Plugins > Text editors > Atto HTML editor > Atto toolbar settings > Toolbar config, to give, for example:
 
