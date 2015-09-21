@@ -47,4 +47,3 @@ $string['cursorinfo'] = 'An arrow indicates the position that new elements from 
 $string['savecomputing'] = 'Save computer science equation';
 $string['settings'] = 'Computer science editor settings';
 $string['update'] = 'Update';
-$string['\dot'] = 'dot mutiply';

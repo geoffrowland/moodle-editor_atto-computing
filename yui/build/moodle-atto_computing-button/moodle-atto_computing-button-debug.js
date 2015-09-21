@@ -19,7 +19,7 @@ YUI.add('moodle-atto_computing-button', function (Y, NAME) {
  * @package    atto_computing
  * @copyright  2014 Geoffrey Rowland <rowland.geoff@gmail.com>
  * Based on    @package atto_equation
- * @copyright  2013 Damyon Wiese <damyon@moodle.com>ese
+ * @copyright  2013 Damyon Wiese <damyon@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
