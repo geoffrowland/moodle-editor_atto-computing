@@ -225,9 +225,4 @@ A \oplus B
                                                 $default);
     $settings->add($setting);
 
-    $setting = new admin_setting_configtext('atto_computing/delay',
-            new lang_string('delay', 'atto_computing'),
-            new lang_string('delay_desc', 'atto_computing'),
-            '100', PARAM_INT);
-    $settings->add($setting);
 }
