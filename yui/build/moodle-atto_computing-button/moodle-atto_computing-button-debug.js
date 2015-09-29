@@ -77,7 +77,9 @@ var COMPONENTNAME = 'atto_computing',
             '<div class="{{CSS.LIBRARY}}">' +
                 '<ul>' +
                     '{{#each library}}' +
-                        '<li><a href="#{{../elementid}}_{{../CSS.LIBRARY_GROUP_PREFIX}}_{{@key}}">' +
+                        '<li><a aria-label="{{get_string grouptitle ../component}}" ' +
+                        'title="{{get_string grouptitle ../component}}" ' +
+                        'href="#{{../elementid}}_{{../CSS.LIBRARY_GROUP_PREFIX}}_{{@key}}">' +
                             '{{get_string groupname ../component}}' +
                         '</a></li>' +
                     '{{/each}}' +
