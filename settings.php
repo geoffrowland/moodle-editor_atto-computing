@@ -43,10 +43,10 @@ if ($ADMIN->fulltree) {
 {}^\wedge
 \div
 /
-\mathrm{div}
+\mathop{\mathrm{div}}
 \backslash
 \bmod
-\%
+\mathop{\%}
 <
 >
 \leq
@@ -93,22 +93,22 @@ if ($ADMIN->fulltree) {
     $name = new lang_string('librarygroup3', 'atto_computing');
     $desc = new lang_string('librarygroup3_desc', 'atto_computing');
     $default = '
-\mathrm{NOT}
+\mathop{\mathrm{NOT}}
 \lnot A
 \overline{A}
-\mathrm{AND}
+\mathop{\mathrm{AND}}
 A \land B
 A \cdot B
-\mathrm{OR}
+\mathop{\mathrm{OR}}
 A \lor B
 A + B
-\mathrm{XOR}
+\mathop{\mathrm{XOR}}
 A \veebar B
 A \oplus B
-\mathrm{NAND}
+\mathop{\mathrm{NAND}}
 \lnot (A \land B)
 \overline{A \cdot B}
-\mathrm{NOR}
+\mathop{\mathrm{NOR}}
 \lnot (A \lor B)
 \overline{A + B}
 =
@@ -148,17 +148,17 @@ A \oplus B
     $name = new lang_string('librarygroup5', 'atto_computing');
     $desc = new lang_string('librarygroup5_desc', 'atto_computing');
     $default = '
-\mathrm{ADD}
-\mathrm{SUB}
-\mathrm{STA}
-\mathrm{LDA}
-\mathrm{BRA}
-\mathrm{BRZ}
-\mathrm{BRP}
-\mathrm{INP}
-\mathrm{OUT}
-\mathrm{HLT}
-\mathrm{DAT}
+\mathop{\mathrm{ADD}}
+\mathop{\mathrm{SUB}}
+\mathop{\mathrm{STA}}
+\mathop{\mathrm{LDA}}
+\mathop{\mathrm{BRA}}
+\mathop{\mathrm{BRZ}}
+\mathop{\mathrm{BRP}}
+\mathop{\mathrm{INP}}
+\mathop{\mathrm{OUT}}
+\mathop{\mathrm{HLT}}
+\mathop{\mathrm{DAT}}
 ';
     $setting = new admin_setting_configtextarea('atto_computing/librarygroup5',
                                                 $name,
